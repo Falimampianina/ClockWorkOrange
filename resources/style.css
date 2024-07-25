@@ -1,9 +1,9 @@
 QWidget {
-    background-color: aqua;
+    background-color: orangered;
 }
 
 QLabel#TimeDisplay {
-    background-color: orangered;
+
     color: white;
     font-weight: bold;
     font-size: 50px;

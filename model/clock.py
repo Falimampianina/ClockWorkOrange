@@ -14,7 +14,7 @@ class Clock(QObject):
         super().__init__()
         self.actual_time = datetime.now()
         self.alarms = alarms
-        self._stop_clock_event = Event()
+        self.stop_clock_event = False
         self.run_clock()
 
     @property
@@ -41,7 +41,7 @@ class Clock(QObject):
         self.time_actualised.emit(self.actual_time)
 
     def update_time_every_second(self):
-        while not self._stop_clock_event.is_set():
+        while not self.stop_clock_event:
             sleep(1)
             self.actualize_time()
 
@@ -50,7 +50,7 @@ class Clock(QObject):
         self.time_updating_thread.start()
 
     def stop_clock(self):
-        self._stop_clock_event.set()
+        self.stop_clock_event = True
         self.time_updating_thread.join()
 
     def add_alarm(self, alarm: Alarm):
