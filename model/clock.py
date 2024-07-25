@@ -4,13 +4,16 @@ from time import sleep
 
 from PySide6.QtCore import QObject, Signal
 
+from model.alarm import Alarm
+
 
 class Clock(QObject):
     time_actualised = Signal(datetime)
 
-    def __init__(self):
+    def __init__(self, alarms: list[Alarm] = None):
         super().__init__()
         self.actual_time = datetime.now()
+        self.alarms = alarms
         self._stop_clock_event = Event()
         self.run_clock()
 
@@ -21,6 +24,17 @@ class Clock(QObject):
     @actual_time.setter
     def actual_time(self, actual_time: datetime):
         self._actual_time = actual_time
+
+    @property
+    def alarms(self) -> list[Alarm]:
+        return self._alarms
+
+    @alarms.setter
+    def alarms(self, alarms: list[Alarm]):
+        if not alarms:
+            self._alarms = []
+        else:
+            self._alarms = alarms
 
     def actualize_time(self):
         self.actual_time = datetime.now()
@@ -38,3 +52,13 @@ class Clock(QObject):
     def stop_clock(self):
         self._stop_clock_event.set()
         self.time_updating_thread.join()
+
+    def add_alarm(self, alarm: Alarm):
+        self.alarms.append(alarm)
+
+    def remove_alarm(self, alarm: Alarm):
+        if alarm in self.alarms:
+            self.alarms.remove(alarm)
+
+    def _is_time_for_alarm(self, alarm: Alarm) -> bool:
+        return datetime.strftime(self.actual_time, "%H:%M") == alarm.timing
