@@ -32,9 +32,9 @@ class Clock(QObject):
             self.actualize_time()
 
     def run_clock(self):
-        self.main_thread = Thread(target=self.update_time_every_second)
-        self.main_thread.start()
+        self.time_updating_thread = Thread(target=self.update_time_every_second)
+        self.time_updating_thread.start()
 
     def stop_clock(self):
         self._stop_clock_event.set()
-        self.main_thread.join()
+        self.time_updating_thread.join()

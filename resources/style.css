@@ -1,3 +1,7 @@
+QWidget {
+    background-color: aqua;
+}
+
 QLabel#TimeDisplay {
     background-color: orangered;
     color: white;
