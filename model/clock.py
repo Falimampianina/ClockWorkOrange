@@ -1,9 +1,11 @@
 from datetime import datetime
-from threading import Event, Thread
+from threading import Thread
 from time import sleep
 
 from PySide6.QtCore import QObject, Signal
+from pytz import timezone
 
+from assets.cities.cities import CITIES
 from model.alarm import Alarm
 
 
@@ -13,8 +15,10 @@ class Clock(QObject):
     def __init__(self, alarms: list[Alarm] = None):
         super().__init__()
         self.actual_time = datetime.now()
+        self.time_zone = "Local"
         self.alarms = alarms
         self.stop_clock_event = False
+        self.time_updating_thread = Thread(target=self.update_time_every_second)
         self.run_clock()
 
     @property
@@ -24,6 +28,26 @@ class Clock(QObject):
     @actual_time.setter
     def actual_time(self, actual_time: datetime):
         self._actual_time = actual_time
+
+    @property
+    def time_zone(self) -> str:
+        return self._time_zone
+
+    @time_zone.setter
+    def time_zone(self, time_zone: str):
+        self._time_zone = time_zone
+
+    def get_actual_time_from_timezone(self, time_zone: str) -> datetime:
+        if time_zone in CITIES["Europe"]:
+            return self.actual_time.astimezone(timezone(f"Europe/{time_zone}"))
+        elif time_zone in CITIES["Asia"]:
+            return self.actual_time.astimezone(timezone(f"Asia/{time_zone}"))
+        elif time_zone in CITIES["Indian"]:
+            return self.actual_time.astimezone(timezone(f"Indian/{time_zone}"))
+        elif time_zone in CITIES["America"]:
+            return self.actual_time.astimezone(timezone(f"America/{time_zone}"))
+        else:
+            return self.actual_time
 
     @property
     def alarms(self) -> list[Alarm]:
@@ -38,7 +62,7 @@ class Clock(QObject):
 
     def actualize_time(self):
         self.actual_time = datetime.now()
-        self.time_actualised.emit(self.actual_time)
+        self.time_actualised.emit(self.get_actual_time_from_timezone(self.time_zone))
 
     def update_time_every_second(self):
         while not self.stop_clock_event:
@@ -46,7 +70,6 @@ class Clock(QObject):
             self.actualize_time()
 
     def run_clock(self):
-        self.time_updating_thread = Thread(target=self.update_time_every_second)
         self.time_updating_thread.start()
 
     def stop_clock(self):

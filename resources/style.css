@@ -10,3 +10,19 @@ QLabel#TimeDisplay {
     padding: 50px;
     border-radius: 20px;
 }
+
+QComboBox {
+    max-width: 220px;
+    background-color: transparent;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    font-size: 30px;
+    padding: 10px;
+    border: 1px solid whitesmoke;
+    border-radius: 10px;
+}
+
+QComboBox::drop-down {
+    border: none;
+}

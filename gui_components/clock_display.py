@@ -3,8 +3,9 @@ import sys
 from datetime import datetime
 
 from PySide6.QtGui import Qt
-from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QApplication, QSizePolicy, QHBoxLayout
+from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QApplication, QSizePolicy, QHBoxLayout, QComboBox
 
+from assets.cities.cities import CITIES
 from model.clock import Clock
 
 
@@ -22,6 +23,7 @@ class ClockGui(QWidget):
         self.modify_time_display_content(self.clock.actual_time)
         self.modify_widgets_properties()
         self.modify_widgets_styling(os.path.join("../resources/style.css"))
+        self.insert_values_in_cities_combo_box()
         self.setup_connections()
 
     @property
@@ -42,14 +44,18 @@ class ClockGui(QWidget):
         self._clock = clock
 
     def create_widgets(self):
+        self.cities_combo_box = QComboBox()
         self.time_display = QLabel()
 
     def create_layouts(self):
         self.main_layout = QVBoxLayout(self)
+        self.cities_layout = QHBoxLayout()
         self.time_layout = QHBoxLayout()
 
     def add_widgets_to_layouts(self):
+        self.main_layout.addLayout(self.cities_layout)
         self.main_layout.addLayout(self.time_layout)
+        self.cities_layout.addWidget(self.cities_combo_box)
         self.time_layout.addWidget(self.time_display)
 
     def modify_time_display_content(self, time: datetime):
@@ -64,12 +70,21 @@ class ClockGui(QWidget):
         # modifying for StyleSheet
         self.time_display.setObjectName("TimeDisplay")
 
-        self.main_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.time_display.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.time_display.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.cities_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+
+    def insert_values_in_cities_combo_box(self):
+        self.cities_combo_box.clear()
+        self.cities_combo_box.addItem("Local")
+        for k, v in CITIES.items():
+            self.cities_combo_box.addItems(v)
 
     def setup_connections(self):
         self.clock.time_actualised.connect(self.modify_time_display_content)
+        self.cities_combo_box.currentTextChanged.connect(self.change_time_zone)
+
+    def change_time_zone(self):
+        self.clock.time_zone = self.cities_combo_box.currentText()
 
     def closeEvent(self, event):
         self.clock.stop_clock()
